@@ -1,14 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dio/dio.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/app_avatar.dart';
 import '../../widgets/app_badge.dart';
 import '../../widgets/feature_icon.dart';
 
-class AccountPage extends StatelessWidget {
+class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
+
+  @override
+  State<AccountPage> createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
+  int _purchaseCount = 0;
+  bool _loadingCount = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPurchaseCount();
+  }
+
+  Future<void> _fetchPurchaseCount() async {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        setState(() => _loadingCount = false);
+        return;
+      }
+
+      final dio = Dio(BaseOptions(
+        connectTimeout: const Duration(seconds: 4),
+        receiveTimeout: const Duration(seconds: 4),
+      ));
+      
+      final response = await dio.get(
+        'http://192.168.1.107:8080/v1/purchases',
+        options: Options(headers: {'Authorization': 'Bearer $uid'}),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data['data'] as List<dynamic>?;
+        if (data != null) {
+          int count = 0;
+          for (var item in data) {
+            count += (item['quantity'] as num? ?? 1).toInt();
+          }
+          setState(() {
+            _purchaseCount = count;
+            _loadingCount = false;
+          });
+          return;
+        }
+      }
+    } catch (e) {
+      debugPrint('[AccountPage] Error fetching purchase count: $e');
+    }
+    setState(() => _loadingCount = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,25 +76,29 @@ class AccountPage extends StatelessWidget {
         final user = state is AuthAuthenticated ? state.user : null;
 
         return Scaffold(
-          backgroundColor: AppColors.bg,
+          backgroundColor: const Color(0xFFF5F5FF),
           body: SingleChildScrollView(
             child: Column(
               children: [
                 // Header
                 Container(
                   decoration: const BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    gradient: AppColors.splashGradient,
                     borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(28),
-                      bottomRight: Radius.circular(28),
+                      bottomLeft: Radius.circular(32),
+                      bottomRight: Radius.circular(32),
                     ),
                   ),
                   padding: EdgeInsets.fromLTRB(
-                      20, MediaQuery.of(context).padding.top + 12, 20, 24),
+                      20, MediaQuery.of(context).padding.top + 16, 20, 32),
                   child: Row(
                     children: [
-                      AppAvatar(name: user?.name ?? 'User', size: 60, bg: Colors.white.withValues(alpha: 0.25)),
-                      const SizedBox(width: 14),
+                      AppAvatar(
+                        name: user?.name ?? 'User',
+                        size: 64,
+                        bg: Colors.white.withValues(alpha: 0.2),
+                      ),
+                      const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,10 +106,12 @@ class AccountPage extends StatelessWidget {
                             Text(user?.name ?? 'Pengguna',
                                 style: const TextStyle(
                                   fontFamily: 'PlusJakartaSans',
-                                  fontSize: 19,
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
                                   color: Colors.white,
+                                  letterSpacing: -0.3,
                                 )),
+                            const SizedBox(height: 2),
                             Text(user?.email ?? '',
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
@@ -63,20 +123,21 @@ class AccountPage extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
+                          color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                         ),
                         child: const Row(
                           children: [
-                            Icon(Icons.verified_user_outlined, size: 14, color: Colors.white),
+                            Icon(Icons.verified_user_rounded, size: 14, color: AppColors.neon),
                             SizedBox(width: 5),
-                            Text('Terverifikasi',
+                            Text('WF Member',
                                 style: TextStyle(
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w800,
                                   color: Colors.white,
                                 )),
                           ],
@@ -86,26 +147,67 @@ class AccountPage extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Section: E-Commerce
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4, bottom: 8),
+                        child: Text('E-Commerce Terhubung',
+                            style: TextStyle(
+                              fontFamily: 'PlusJakartaSans',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.slate500,
+                            )),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          boxShadow: AppColors.shadowSoft,
+                        ),
+                        child: Column(
+                          children: [
+                            _Row(
+                              icon: Icons.shopping_bag_outlined,
+                              tone: 'violet',
+                              title: 'Bag Store',
+                              subtitle: _loadingCount 
+                                  ? 'Memuat riwayat...' 
+                                  : 'Terhubung · $_purchaseCount produk dibeli',
+                              onTap: () async {
+                                final result = await context.push('/bag-store');
+                                if (result == true) {
+                                  setState(() => _loadingCount = true);
+                                  _fetchPurchaseCount();
+                                }
+                              },
+                              right: const AppBadge(label: 'Online', tone: 'green'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Section: Keamanan
                       const Padding(
                         padding: EdgeInsets.only(left: 4, bottom: 8),
                         child: Text('Keamanan',
                             style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.slate400,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.slate500,
                             )),
                       ),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(22),
                           boxShadow: AppColors.shadowSoft,
                         ),
                         child: Column(
@@ -129,7 +231,7 @@ class AccountPage extends StatelessWidget {
                             const Divider(height: 1, indent: 56, color: AppColors.line2),
                             _Row(
                               icon: Icons.fingerprint_rounded,
-                              tone: 'violet',
+                              tone: 'orange',
                               title: 'Login biometrik',
                               subtitle: 'Sidik jari',
                               onTap: () {},
@@ -138,21 +240,23 @@ class AccountPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 20),
+
+                      // Section: Akun
                       const Padding(
                         padding: EdgeInsets.only(left: 4, bottom: 8),
-                        child: Text('Akun',
+                        child: Text('Pengaturan Akun',
                             style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.slate400,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.slate500,
                             )),
                       ),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(22),
                           boxShadow: AppColors.shadowSoft,
                         ),
                         child: Column(
@@ -165,40 +269,44 @@ class AccountPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 24),
+
+                      // Logout button
                       GestureDetector(
                         onTap: () => context.read<AuthBloc>().add(AuthLogoutRequested()),
                         child: Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(18),
                             boxShadow: AppColors.shadowSoft,
+                            border: Border.all(color: AppColors.red.withValues(alpha: 0.1)),
                           ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.logout_rounded, size: 20, color: AppColors.red),
                               SizedBox(width: 9),
-                              Text('Keluar',
+                              Text('Keluar dari Akun',
                                   style: TextStyle(
                                     fontFamily: 'PlusJakartaSans',
                                     color: AppColors.red,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
                                     fontSize: 15,
                                   )),
                             ],
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       const Center(
-                        child: Text('Dompet Kampus Global · v1.0.0',
+                        child: Text('Wallet Frenzy · v2.0.0',
                             style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
                               fontSize: 12,
                               color: AppColors.slate400,
+                              fontWeight: FontWeight.w600,
                             )),
                       ),
                       const SizedBox(height: 24),
@@ -237,7 +345,7 @@ class _Row extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
             FeatureIcon(icon: icon, tone: tone, size: 42, iconSize: 20),
@@ -250,11 +358,11 @@ class _Row extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 14.5,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                         color: AppColors.ink,
                       )),
                   if (subtitle != null) ...[
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(subtitle!,
                         style: const TextStyle(
                           fontFamily: 'PlusJakartaSans',
@@ -289,7 +397,7 @@ class _ToggleState extends State<_Toggle> {
         width: 44,
         height: 26,
         decoration: BoxDecoration(
-          color: _on ? AppColors.green : AppColors.line,
+          color: _on ? AppColors.green : AppColors.slate300,
           borderRadius: BorderRadius.circular(20),
         ),
         child: AnimatedAlign(
