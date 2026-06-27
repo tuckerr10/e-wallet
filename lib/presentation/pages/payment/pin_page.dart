@@ -167,8 +167,10 @@ class _PinPageState extends State<PinPage> {
     final ref = _callbackReference;
     if (ref != null && (ref.startsWith('single:') || ref.startsWith('cart:'))) {
       try {
-        final uid = FirebaseAuth.instance.currentUser?.uid;
-        if (uid != null) {
+        final merchantToken = widget.flowData['merchantUserToken'] as String?;
+        final localUid = FirebaseAuth.instance.currentUser?.uid;
+        final tokenToUse = merchantToken ?? localUid;
+        if (tokenToUse != null) {
           final dio = Dio(BaseOptions(
             connectTimeout: const Duration(seconds: 4),
             receiveTimeout: const Duration(seconds: 4),
@@ -180,7 +182,7 @@ class _PinPageState extends State<PinPage> {
             final quantity = int.parse(parts[2]);
             await dio.post(
               'http://192.168.1.107:8080/v1/products/buy',
-              options: Options(headers: {'Authorization': 'Bearer $uid'}),
+              options: Options(headers: {'Authorization': 'Bearer $tokenToUse'}),
               data: {'product_id': productId, 'quantity': quantity},
             );
           } else if (ref.startsWith('cart:')) {
@@ -189,7 +191,7 @@ class _PinPageState extends State<PinPage> {
             final cartIds = parts[1].split(',').map((e) => int.parse(e)).toList();
             await dio.post(
               'http://192.168.1.107:8080/v1/cart/checkout',
-              options: Options(headers: {'Authorization': 'Bearer $uid'}),
+              options: Options(headers: {'Authorization': 'Bearer $tokenToUse'}),
               data: {'cart_ids': cartIds},
             );
           }
