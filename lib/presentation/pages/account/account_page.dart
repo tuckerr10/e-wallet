@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dio/dio.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/network/api_client.dart';
+import '../../../injection/injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/app_avatar.dart';
 import '../../widgets/app_badge.dart';
@@ -19,11 +21,55 @@ class AccountPage extends StatefulWidget {
 class _AccountPageState extends State<AccountPage> {
   int _purchaseCount = 0;
   bool _loadingCount = true;
+  bool _bagStoreConnected = false;
+  bool _loadingConnection = true;
 
   @override
   void initState() {
     super.initState();
     _fetchPurchaseCount();
+    _fetchConnectionStatus();
+  }
+
+  Future<void> _fetchConnectionStatus() async {
+    try {
+      final client = sl<ApiClient>();
+      final response = await client.get('/v1/auth/connection');
+      if (response['success'] == true) {
+        setState(() {
+          _bagStoreConnected = response['connected'] as bool? ?? false;
+          _loadingConnection = false;
+        });
+        return;
+      }
+    } catch (e) {
+      debugPrint('[AccountPage] Error fetching connection status: $e');
+    }
+    setState(() => _loadingConnection = false);
+  }
+
+  Future<void> _toggleConnection() async {
+    setState(() => _loadingConnection = true);
+    try {
+      final client = sl<ApiClient>();
+      final response = await client.post('/v1/auth/connection/toggle');
+      if (response['success'] == true) {
+        setState(() {
+          _bagStoreConnected = response['connected'] as bool? ?? false;
+          _loadingConnection = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_bagStoreConnected ? 'Bag Store berhasil terhubung!' : 'Koneksi Bag Store diputuskan.'),
+            backgroundColor: _bagStoreConnected ? AppColors.green : AppColors.amber,
+          ),
+        );
+        return;
+      }
+    } catch (e) {
+      debugPrint('[AccountPage] Error toggling connection: $e');
+    }
+    setState(() => _loadingConnection = false);
   }
 
   Future<void> _fetchPurchaseCount() async {
@@ -176,17 +222,38 @@ class _AccountPageState extends State<AccountPage> {
                               icon: Icons.shopping_bag_outlined,
                               tone: 'violet',
                               title: 'Bag Store',
-                              subtitle: _loadingCount 
-                                  ? 'Memuat riwayat...' 
-                                  : 'Terhubung · $_purchaseCount produk dibeli',
+                              subtitle: _loadingConnection
+                                  ? 'Memuat status koneksi...'
+                                  : _bagStoreConnected
+                                      ? (_loadingCount
+                                          ? 'Terhubung · Memuat...'
+                                          : 'Terhubung · $_purchaseCount produk dibeli')
+                                      : 'Terputus · Hubungkan untuk belanja',
                               onTap: () async {
                                 final result = await context.push('/bag-store');
                                 if (result == true) {
-                                  setState(() => _loadingCount = true);
+                                  setState(() {
+                                    _loadingCount = true;
+                                    _loadingConnection = true;
+                                  });
                                   _fetchPurchaseCount();
+                                  _fetchConnectionStatus();
                                 }
                               },
-                              right: const AppBadge(label: 'Online', tone: 'green'),
+                              right: _loadingConnection
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                                      ),
+                                    )
+                                  : Switch.adaptive(
+                                      value: _bagStoreConnected,
+                                      onChanged: (_) => _toggleConnection(),
+                                      activeTrackColor: AppColors.green,
+                                    ),
                             ),
                           ],
                         ),
