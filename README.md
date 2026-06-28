@@ -49,7 +49,7 @@ Proyek ini terdiri dari **4 repository** yang saling terhubung membentuk ekosist
 |:---:|:---|:---:|
 | 📱 **Frontend E-Wallet** | Aplikasi Flutter E-Wallet *(Anda di sini)* | — |
 | ⚙️ **Backend E-Wallet** | REST API untuk layanan E-Wallet | [Klik disini](https://github.com/tuckerr10/e-wallet-back-end.git) |
-| 🛍️ **Frontend Bag Store** | Aplikasi Flutter E-Commerce Tas | [Klik disini](https://github.com/tuckerr10/uts_1123150125_bagstore.git) |
+| 🛍️ **Frontend Bag Store** | Aplikasi Flutter E-Commerce Tas | [Klik disini](https://github.com/tuckerr10/bag-store-UAS.git) |
 | 🗄️ **Backend Bag Store** | REST API untuk layanan Bag Store | [Klik disini](https://github.com/tuckerr10/bag-store-be-UAS.git) |
 
 ---
