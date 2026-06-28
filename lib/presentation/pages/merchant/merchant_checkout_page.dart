@@ -46,39 +46,61 @@ class _MerchantCheckoutPageState extends State<MerchantCheckoutPage> {
         return;
       }
 
-      final token = await user.getIdToken();
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
+      // Simulate network delay
+      await Future.delayed(const Duration(milliseconds: 600));
 
-      // Fetch all products instead of cart
-      final response = await dio.get(
-        'http://192.168.1.107:8080/v1/products',
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
-      );
+      // Dummy products from Bag Store for testing checkout in e-wallet
+      final List<Map<String, dynamic>> dummyProducts = [
+        {
+          "id": 3,
+          "name": "Tas Ransel Eiger Adventure",
+          "price": 450000.0,
+          "image_url": "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80"
+        },
+        {
+          "id": 4,
+          "name": "Tas Ransel Sekolah Polo",
+          "price": 250000.0,
+          "image_url": "https://images.unsplash.com/photo-1546938576-6e6a64f317cc?auto=format&fit=crop&w=500&q=80"
+        },
+        {
+          "id": 5,
+          "name": "Backpack Laptop Minimalis",
+          "price": 350000.0,
+          "image_url": "https://www.mah-official.com/cdn/shop/files/line-backpackor-c-600-mah-1.jpg?v=1778663183&width=2048"
+        },
+        {
+          "id": 6,
+          "name": "Tas Ransel Kulit Premium",
+          "price": 850000.0,
+          "image_url": "https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?auto=format&fit=crop&w=500&q=80"
+        },
+        {
+          "id": 7,
+          "name": "Daypack Gunung 30L",
+          "price": 550000.0,
+          "image_url": "https://images.unsplash.com/photo-1600857062241-98e5dba7f214?auto=format&fit=crop&w=500&q=80"
+        },
+        {
+          "id": 8,
+          "name": "Tas Ransel Casual Kanvas",
+          "price": 180000.0,
+          "image_url": "https://images.unsplash.com/photo-1581605405669-fcdf81165afa?auto=format&fit=crop&w=500&q=80"
+        }
+      ];
 
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data;
-        final List<dynamic> items = data['data'] as List<dynamic>? ?? [];
-        setState(() {
-          _cartItems = items.map((e) {
-            final m = Map<String, dynamic>.from(e as Map);
-            m['quantity'] = 1; // dummy quantity
-            return m;
-          }).toList();
-          _selectedItemIds.clear();
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _errorMsg = 'Gagal mengambil data produk.';
-          _isLoading = false;
-        });
-      }
+      setState(() {
+        _cartItems = dummyProducts.map((e) {
+          final m = Map<String, dynamic>.from(e);
+          m['quantity'] = 1; // dummy quantity
+          return m;
+        }).toList();
+        _selectedItemIds.clear();
+        _isLoading = false;
+      });
     } catch (e) {
       setState(() {
-        _errorMsg = 'Koneksi ke Bag Store gagal.';
+        _errorMsg = 'Gagal memuat produk.';
         _isLoading = false;
       });
       debugPrint('Error fetch products: $e');
