@@ -5,77 +5,126 @@ Tugas ini disusun untuk memenuhi **Ujian Akhir Semester (UAS) Mobile Application
 **Nama**: Moh Frendy Aprianto  
 **NIM**: 1123150125  
 
-## Video Presentasi / Demo
-🔗 [Tonton di YouTube](https://youtu.be/tzie9l5RnwQ?si=2drLyATr8UgkY9q4)
-
-## Tautan Repository Terkait
-Berikut adalah link repository untuk bagian lain dari ekosistem aplikasi ini:
-- **Backend E-Money**: [https://github.com/tuckerr10/e-wallet-back-end.git](https://github.com/tuckerr10/e-wallet-back-end.git)
-- **Backend Bagstore**: [https://github.com/tuckerr10/bag-store-be-UAS.git](https://github.com/tuckerr10/bag-store-be-UAS.git)
-- **Frontend Bagstore**: [https://github.com/tuckerr10/uts_1123150125_bagstore.git](https://github.com/tuckerr10/uts_1123150125_bagstore.git)
+Aplikasi ini adalah bagian **Frontend** dari sistem E-Wallet komprehensif, yang memungkinkan pengguna untuk melakukan pembayaran, transfer saldo, kelola uang (top-up), serta terintegrasi langsung dengan ekosistem merchant (Bagstore). Aplikasi ini dibangun dengan standar arsitektur industri untuk memastikan skalabilitas dan maintainability.
 
 ---
 
-## Struktur Folder Project (E-Wallet Frontend)
+## 🎥 Video Presentasi / Demo
+🔗 [Tonton Demonstrasi Aplikasi di YouTube](https://youtu.be/tzie9l5RnwQ?si=2drLyATr8UgkY9q4)
 
-Aplikasi frontend ini dibangun menggunakan framework **Flutter**. Berikut adalah gambaran umum dari struktur foldernya:
+---
+
+## 🔗 Tautan Repository Ekosistem
+Sistem E-Wallet ini terhubung dengan beberapa servis lainnya. Berikut adalah struktur repository keseluruhan project:
+- **Frontend E-Wallet (Saat ini)**: [https://github.com/tuckerr10/e-wallet.git](https://github.com/tuckerr10/e-wallet.git)
+- **Backend E-Wallet**: [https://github.com/tuckerr10/e-wallet-back-end.git](https://github.com/tuckerr10/e-wallet-back-end.git)
+- **Frontend Merchant (Bagstore)**: [https://github.com/tuckerr10/uts_1123150125_bagstore.git](https://github.com/tuckerr10/uts_1123150125_bagstore.git)
+- **Backend Merchant (Bagstore)**: [https://github.com/tuckerr10/bag-store-be-UAS.git](https://github.com/tuckerr10/bag-store-be-UAS.git)
+
+---
+
+## 🛠️ Teknologi & Packages yang Digunakan
+
+Aplikasi ini dikembangkan menggunakan **Flutter** dengan pendekatan *Clean Architecture*. Berikut adalah rincian teknologi dan library utama yang digunakan:
+
+### 1. State Management & Architecture
+- **flutter_bloc & equatable**: Digunakan sebagai pattern BLoC (Business Logic Component) untuk memisahkan UI dan business logic secara reaktif.
+- **get_it**: Sebagai Dependency Injection (DI) locator untuk mengatur instance repositories, datasources, dan blocs.
+- **Clean Architecture**: Membagi kode menjadi layer `Domain`, `Data`, dan `Presentation` untuk modularitas tinggi.
+
+### 2. Networking & Integrasi API
+- **dio**: HTTP client handal untuk menghandle request REST API, interceptors, form data, dan timeout handling.
+- **pretty_dio_logger**: Untuk kebutuhan debugging response/request log di console.
+
+### 3. Keamanan & Local Storage
+- **flutter_secure_storage**: Untuk menyimpan data sensitif (seperti token JWT dan PIN) secara aman berkat enkripsi bawaan sistem operasi (Keystore/Keychain).
+- **shared_preferences**: Untuk menyimpan konfigurasi aplikasi yang sifatnya non-sensitif (seperti status onboarding).
+
+### 4. Navigasi & Deep Linking
+- **go_router**: Digunakan untuk manajemen rute yang kompleks, deklaratif, dan berbasis path (URL-based routing).
+- **app_links & url_launcher**: Untuk menangani pembayaran via intent eksternal atau deep links dari aplikasi Bagstore ke E-Wallet ini.
+
+### 5. Firebase Services
+- **firebase_auth & google_sign_in**: Digunakan untuk autentikasi pengguna secara instan via Google.
+- **firebase_messaging**: Menghandle Cloud Messaging (FCM) dan Push Notifications.
+
+### 6. Fitur Pendukung Lanjutan
+- **mobile_scanner**: Fitur scan QR Code untuk melakukan pembayaran dengan cepat ke merchant.
+- **flutter_local_notifications**: Menampilkan notifikasi lokal secara real-time pada device.
+- **cached_network_image & shimmer**: Mengoptimalkan rendering gambar dari network dan menyediakan animasi *loading state* (skeleton UI).
+- **intl**: Digunakan untuk konversi format mata uang (Rupiah) dan formatting waktu/tanggal.
+
+---
+
+## 📂 Struktur Folder Project
+
+Mengadopsi pola *Clean Architecture* dan *Feature-First*, berikut adalah struktur utama di dalam direktori `lib/`:
 
 ```text
-e-money-front-end/
+lib/
+├── core/                   # Logika pendukung (Router, Utils, Constants, Network Info)
+│   ├── router/             # Konfigurasi GoRouter
+│   ├── services/           # Deeplink & Notification Services
+│   └── utils/              # Helper, formatters, etc.
 │
-├── android/           # Kode native untuk platform Android
-├── ios/               # Kode native untuk platform iOS
-├── lib/               # Kode utama aplikasi (Dart)
-│   ├── core/          # Utils, Services (seperti notifikasi), Router
-│   ├── data/          # Models, Repositories, Datasources API
-│   ├── domain/        # Logic domain, Use Cases
-│   ├── injection/     # Setup Dependency Injection
-│   ├── presentation/  # UI: Pages, Widgets, Blocs/Cubits
-│   └── main.dart      # Entry point aplikasi
+├── data/                   # Layer Data (API, Database lokal, Models)
+│   ├── datasources/        # Remote (Dio) & Local Datasources
+│   ├── models/             # Data transfer object (JSON parser)
+│   └── repositories/       # Implementasi repository (Contract resolver)
 │
-├── assets/            # Gambar, Icon, dan file aset lainnya
-├── test/              # Unit testing dan widget testing
-├── pubspec.yaml       # Konfigurasi package/dependensi Flutter
-└── README.md          # Dokumentasi ini
+├── domain/                 # Layer Domain (Aturan Bisnis Murni)
+│   ├── entities/           # Entitas inti
+│   ├── repositories/       # Abstraksi (Interface) Repository
+│   └── usecases/           # Eksekutor operasi per fitur
+│
+├── injection/              # File konfigurasi get_it untuk injeksi dependensi
+│
+├── presentation/           # Layer Presentasi (UI & State)
+│   ├── blocs/              # Manajemen state (AuthBloc, TransactionBloc, dll)
+│   ├── pages/              # Halaman utama (Home, Login, History, Topup, Transfer)
+│   └── widgets/            # Komponen UI Reusable (Custom Button, TabBar, Row)
+│
+└── main.dart               # Entry point aplikasi
 ```
 
 ---
 
-## Cara Menjalankan Aplikasi
+## 🚀 Cara Menjalankan Aplikasi
 
-Untuk menjalankan frontend e-wallet ini di mesin lokal Anda, ikuti langkah-langkah berikut:
+Ikuti panduan berikut untuk build dan run project E-Wallet ini secara lokal:
 
-1. **Pastikan Flutter Terinstal**
-   Pastikan Anda sudah menginstal Flutter SDK. Periksa dengan menjalankan:
+1. **Pastikan Requirements Terpenuhi**
+   Pastikan Anda sudah menginstal Flutter SDK (>=3.0.0) dan environment Android Studio/Xcode sudah siap.
    ```bash
    flutter doctor
    ```
 
-2. **Clone Repository Ini**
+2. **Clone Repository**
    ```bash
    git clone https://github.com/tuckerr10/e-wallet.git
    cd e-wallet
    ```
 
-3. **Install Dependensi**
-   Jalankan perintah ini untuk mengunduh semua package yang diperlukan:
+3. **Install Dependensi Package**
    ```bash
    flutter pub get
    ```
 
-4. **Jalankan Aplikasi**
-   Pastikan Anda telah menyambungkan emulator atau perangkat fisik (Android/iOS). Kemudian jalankan:
+4. **Konfigurasi Lingkungan (Opsional tapi Penting)**
+   Pastikan Service **Backend E-Wallet** sudah berjalan (entah di localhost atau hosting). Jika di localhost, Anda mungkin perlu menyesuaikan `BASE_URL` di konfigurasi network (Dio) agar mengarah ke `10.0.2.2` (Emulator Android) atau IP lokal mesin Anda.
+
+5. **Jalankan Aplikasi**
+   Pilih emulator atau real device, lalu ketikkan:
    ```bash
    flutter run
    ```
-   > **Catatan**: Jika Anda ingin menjalankan ke environment tertentu, pastikan backend E-Money sudah berjalan di lokal/server dan URL API di aplikasi sudah disesuaikan agar terhubung.
 
 ---
 
-## Screenshot Aplikasi
+## 📱 Screenshot / Tampilan Aplikasi
 
-Berikut adalah 16 tampilan (screenshot) dari aplikasi E-Wallet ini. 
-*(Tips: Nanti saat memindahkan gambar, ganti URL di dalam kurung di bawah ini dengan link gambar yang Anda drag-and-drop ke GitHub).*
+Berikut adalah dokumentasi tampilan (16 screen) dari fungsionalitas aplikasi E-Wallet.
+*(Silakan drag-and-drop foto-foto screenshot Anda ke bagian ini saat mengedit README.md langsung dari GitHub, lalu ganti teks URL fotonya).*
 
 | | | | |
 |:---:|:---:|:---:|:---:|
