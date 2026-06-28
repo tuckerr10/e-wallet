@@ -22,7 +22,7 @@ class TransactionModel extends TransactionEntity {
       description: json['description'] as String? ?? '',
       balanceBefore: (json['balance_before'] as num? ?? 0).toDouble(),
       balanceAfter: (json['balance_after'] as num? ?? 0).toDouble(),
-      createdAt: DateTime.tryParse(json['CreatedAt'] ?? json['created_at'] as String? ?? '') ?? DateTime.now(),
+      createdAt: DateTime.tryParse(json['CreatedAt'] ?? json['created_at'] as String? ?? '')?.toLocal() ?? DateTime.now(),
     );
   }
 }

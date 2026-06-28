@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
+import '../../../core/utils/notification_helper.dart';
+import '../../../core/utils/local_notification_helper.dart';
 import '../../blocs/account/account_bloc.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/feature_icon.dart';
@@ -32,6 +34,16 @@ class _SuccessPageState extends State<SuccessPage> {
     super.initState();
     // Refresh account data after successful transaction
     context.read<AccountBloc>().add(AccountRefreshRequested());
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.subtitle.contains('Bag Store')) {
+        LocalNotificationHelper.showNotification(
+          id: 7,
+          title: 'Pembayaran Berhasil di Bag Store',
+          body: 'Terima kasih telah berbelanja!',
+        );
+      }
+    });
   }
 
   @override

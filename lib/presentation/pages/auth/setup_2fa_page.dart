@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../widgets/app_badge.dart';
 import '../../widgets/app_button.dart';
-import '../../widgets/feature_icon.dart';
 
 const _twoFaMethods = [
   _TwoFaMethod(
     key: 'smtp',
-    icon: DkgIcons.mail,
-    tone: 'blue',
+    icon: Icons.mail_outline_rounded,
     title: 'Email OTP (SMTP)',
     desc: 'Kode 6 digit dikirim ke email kamu setiap kali masuk.',
     route: '/2fa/smtp',
   ),
   _TwoFaMethod(
     key: 'totp',
-    icon: DkgIcons.smartphone,
-    tone: 'violet',
+    icon: Icons.smartphone_outlined,
     title: 'Authenticator (TOTP)',
     desc: 'Kode berubah tiap 30 detik di Google Authenticator / Authy.',
     route: '/2fa/totp',
@@ -25,8 +21,7 @@ const _twoFaMethods = [
   ),
   _TwoFaMethod(
     key: 'notif',
-    icon: DkgIcons.bell,
-    tone: 'green',
+    icon: Icons.notifications_outlined,
     title: 'Notifikasi OTP',
     desc: 'Setujui permintaan masuk lewat notifikasi di HP kamu.',
     route: '/2fa/notif',
@@ -36,7 +31,6 @@ const _twoFaMethods = [
 class _TwoFaMethod {
   final String key;
   final IconData icon;
-  final String tone;
   final String title;
   final String desc;
   final String route;
@@ -44,7 +38,6 @@ class _TwoFaMethod {
   const _TwoFaMethod({
     required this.key,
     required this.icon,
-    required this.tone,
     required this.title,
     required this.desc,
     required this.route,
@@ -71,7 +64,7 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
             Align(
               alignment: Alignment.topLeft,
               child: IconButton(
-                icon: const Icon(DkgIcons.arrowLeft, color: AppColors.ink),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                 onPressed: () => context.canPop() ? context.pop() : context.go('/akun'),
               ),
             ),
@@ -84,11 +77,11 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
+                      color: Colors.black,
                       borderRadius: BorderRadius.circular(18),
                     ),
                     child: const Center(
-                      child: Icon(DkgIcons.shieldCheck, size: 30, color: AppColors.primary),
+                      child: Icon(Icons.shield_outlined, size: 30, color: Colors.white),
                     ),
                   ),
                   const SizedBox(height: 18),
@@ -97,7 +90,7 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                         fontFamily: 'PlusJakartaSans',
                         fontSize: 25,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
+                        color: Colors.black,
                         letterSpacing: -0.4,
                       )),
                   const SizedBox(height: 7),
@@ -106,7 +99,7 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                     style: TextStyle(
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 14.5,
-                      color: AppColors.slate500,
+                      color: Colors.black54,
                       height: 1.5,
                     ),
                   ),
@@ -125,19 +118,24 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                       margin: const EdgeInsets.only(bottom: 13),
                       padding: const EdgeInsets.all(15),
                       decoration: BoxDecoration(
-                        color: on ? AppColors.primarySurface : Colors.white,
+                        color: on ? Colors.black : Colors.white,
                         borderRadius: BorderRadius.circular(18),
                         border: Border.all(
-                          color: on ? AppColors.primaryLight : AppColors.line,
+                          color: on ? Colors.black : const Color(0xFFE0E0E0),
                           width: 1.8,
                         ),
-                        boxShadow: on
-                            ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.08), blurRadius: 0, spreadRadius: 4)]
-                            : [],
                       ),
                       child: Row(
                         children: [
-                          FeatureIcon(icon: m.icon, tone: m.tone),
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFF5F5F5),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(m.icon, color: Colors.black87, size: 22),
+                          ),
                           const SizedBox(width: 14),
                           Expanded(
                             child: Column(
@@ -148,11 +146,11 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                                     Flexible(
                                       child: Text(m.title,
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontFamily: 'PlusJakartaSans',
                                             fontSize: 15.5,
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.ink,
+                                            color: on ? Colors.white : Colors.black,
                                           )),
                                     ),
                                     if (m.badge != null) ...[
@@ -163,10 +161,10 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                                 ),
                                 const SizedBox(height: 3),
                                 Text(m.desc,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontFamily: 'PlusJakartaSans',
                                       fontSize: 12.8,
-                                      color: AppColors.slate500,
+                                      color: on ? Colors.white70 : Colors.black54,
                                       height: 1.45,
                                     )),
                               ],
@@ -179,9 +177,9 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                             height: 22,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: on ? AppColors.primary : Colors.white,
+                              color: on ? Colors.white : Colors.white,
                               border: Border.all(
-                                color: on ? AppColors.primary : AppColors.line,
+                                color: on ? Colors.white : const Color(0xFFE0E0E0),
                                 width: 2,
                               ),
                             ),
@@ -192,7 +190,7 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
                                       height: 9,
                                       decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: Colors.white,
+                                        color: Colors.black,
                                       ),
                                     ),
                                   )
@@ -209,6 +207,7 @@ class _Setup2FAPageState extends State<Setup2FAPage> {
               padding: const EdgeInsets.fromLTRB(26, 14, 26, 22),
               child: AppButton(
                 label: 'Lanjutkan',
+                variant: AppButtonVariant.dark,
                 onPressed: () {
                   final m = _twoFaMethods.firstWhere((m) => m.key == _selected);
                   context.go(m.route, extra: {'mode': 'setup'});

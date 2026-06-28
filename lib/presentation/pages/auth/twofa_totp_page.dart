@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../blocs/auth/otp_bloc.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/code_input.dart';
-import '../../widgets/feature_icon.dart';
 
 class TwoFATotpPage extends StatefulWidget {
   final String mode;
@@ -65,7 +63,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
           });
         } else if (state is OtpError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppColors.red),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
@@ -77,7 +75,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  icon: const Icon(DkgIcons.arrowLeft, color: AppColors.ink),
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                   onPressed: () {
                     if (_step == 'code' && widget.mode == 'setup') {
                       setState(() => _step = 'scan');
@@ -91,7 +89,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
                 child: BlocBuilder<OtpBloc, OtpState>(
                   builder: (context, state) {
                     if (state is OtpLoading && _step == 'loading') {
-                      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                      return const Center(child: CircularProgressIndicator(color: Colors.black));
                     }
                     if (_step == 'scan' && state is OtpTotpSetup) {
                       return _buildScanStep(state, context);
@@ -112,21 +110,29 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
       padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
       child: Column(
         children: [
-          const FeatureIcon(icon: DkgIcons.smartphone, tone: 'violet', size: 74, iconSize: 36),
+          Container(
+            width: 74,
+            height: 74,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F5F5),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.smartphone_outlined, color: Colors.black87, size: 36),
+          ),
           const SizedBox(height: 18),
           const Text('Hubungkan Authenticator',
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 23,
                 fontWeight: FontWeight.w800,
-                color: AppColors.ink,
+                color: Colors.black,
                 letterSpacing: -0.3,
               )),
           const SizedBox(height: 8),
           const Text(
             'Pindai QR ini dengan Google Authenticator, Authy, atau aplikasi sejenis.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.5, color: AppColors.slate500, height: 1.55),
+            style: TextStyle(fontSize: 14.5, color: Colors.black54, height: 1.55),
           ),
           const SizedBox(height: 22),
           // QR code from base64
@@ -135,8 +141,14 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(18),
-              boxShadow: AppColors.shadowCard,
-              border: Border.all(color: AppColors.line),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                )
+              ],
+              border: Border.all(color: const Color(0xFFEEEEEE)),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12),
@@ -147,8 +159,8 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
                 errorBuilder: (_, __, ___) => Container(
                   width: 172,
                   height: 172,
-                  color: AppColors.bg,
-                  child: const Center(child: Icon(Icons.qr_code_rounded, size: 80, color: AppColors.slate400)),
+                  color: const Color(0xFFF5F5F5),
+                  child: const Center(child: Icon(Icons.qr_code_rounded, size: 80, color: Colors.black26)),
                 ),
               ),
             ),
@@ -156,7 +168,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
           const SizedBox(height: 18),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            decoration: BoxDecoration(color: AppColors.bg, borderRadius: BorderRadius.circular(14)),
+            decoration: BoxDecoration(color: const Color(0xFFF5F5F5), borderRadius: BorderRadius.circular(14)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -165,7 +177,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
                       fontFamily: 'PlusJakartaSans',
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.slate400,
+                      color: Colors.black54,
                       letterSpacing: 0.5,
                     )),
                 const SizedBox(height: 6),
@@ -180,7 +192,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
                           fontFamily: 'Courier',
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.ink,
+                          color: Colors.black,
                           letterSpacing: 1,
                         ),
                       ),
@@ -199,12 +211,12 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
                           if (mounted) setState(() => _copied = false);
                         });
                       },
-                      icon: Icon(_copied ? DkgIcons.check : DkgIcons.copy,
-                          size: 17, color: _copied ? AppColors.green : AppColors.primary),
+                      icon: Icon(_copied ? Icons.check_rounded : Icons.copy_rounded,
+                          size: 17, color: _copied ? Colors.green : Colors.black),
                       label: Text(_copied ? 'Tersalin' : 'Salin',
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
-                            color: _copied ? AppColors.green : AppColors.primary,
+                            color: _copied ? Colors.green : Colors.black,
                             fontWeight: FontWeight.w700,
                             fontSize: 13,
                           )),
@@ -217,6 +229,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
           const SizedBox(height: 24),
           AppButton(
             label: 'Saya sudah memindai',
+            variant: AppButtonVariant.dark,
             onPressed: () => setState(() => _step = 'code'),
           ),
         ],
@@ -229,20 +242,28 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
       padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
       child: Column(
         children: [
-          const FeatureIcon(icon: DkgIcons.smartphone, tone: 'violet', size: 74, iconSize: 36),
+          Container(
+            width: 74,
+            height: 74,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF5F5F5),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.smartphone_outlined, color: Colors.black87, size: 36),
+          ),
           const SizedBox(height: 18),
           const Text('Masukkan kode 6 digit',
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
                 fontSize: 23,
                 fontWeight: FontWeight.w800,
-                color: AppColors.ink,
+                color: Colors.black,
                 letterSpacing: -0.3,
               )),
           const SizedBox(height: 8),
           const Text('Buka aplikasi authenticator kamu dan masukkan kode yang sedang aktif.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14.5, color: AppColors.slate500, height: 1.55)),
+              style: TextStyle(fontSize: 14.5, color: Colors.black54, height: 1.55)),
           const SizedBox(height: 28),
           AnimatedContainer(
             duration: const Duration(milliseconds: 80),
@@ -254,7 +275,7 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
             const Text('Kode tidak cocok',
                 style: TextStyle(
                   fontFamily: 'PlusJakartaSans',
-                  color: AppColors.red,
+                  color: Colors.red,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 )),
@@ -269,13 +290,13 @@ class _TwoFATotpPageState extends State<TwoFATotpPage> {
                 child: CircularProgressIndicator(
                   value: _ttl / 30,
                   strokeWidth: 2.4,
-                  backgroundColor: AppColors.line,
-                  valueColor: const AlwaysStoppedAnimation(AppColors.violet),
+                  backgroundColor: const Color(0xFFEEEEEE),
+                  valueColor: const AlwaysStoppedAnimation(Colors.black),
                 ),
               ),
               const SizedBox(width: 8),
               Text('Kode berganti dalam ${_ttl}s',
-                  style: const TextStyle(fontSize: 13, color: AppColors.slate500)),
+                  style: const TextStyle(fontSize: 13, color: Colors.black54)),
             ],
           ),
         ],

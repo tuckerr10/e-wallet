@@ -183,16 +183,19 @@ class _PinPageState extends State<PinPage> {
             await dio.post(
               'http://192.168.1.107:8080/v1/products/buy',
               options: Options(headers: {'Authorization': 'Bearer $tokenToUse'}),
-              data: {'product_id': productId, 'quantity': quantity},
+              data: {'product_id': productId, 'quantity': quantity, 'payment_method': 'wallet_frenzy'},
             );
           } else if (ref.startsWith('cart:')) {
             // Format: cart:id1,id2,id3
             final parts = ref.split(':');
             final cartIds = parts[1].split(',').map((e) => int.parse(e)).toList();
             await dio.post(
-              'http://192.168.1.107:8080/v1/cart/checkout',
-              options: Options(headers: {'Authorization': 'Bearer $tokenToUse'}),
-              data: {'cart_ids': cartIds},
+              'http://192.168.1.107:8080/v1/internal/cart/checkout',
+              data: {
+                'user_id': tokenToUse,
+                'cart_ids': cartIds,
+                'payment_method': 'wallet_frenzy'
+              },
             );
           }
           debugPrint('[PinPage] Berhasil sinkronisasi transaksi ke Bag Store');
@@ -220,7 +223,7 @@ class _PinPageState extends State<PinPage> {
         'lines': [
           ['Jumlah', CurrencyFormatter.format(result.amount)],
           ['Saldo setelah', CurrencyFormatter.format(result.balanceAfter)],
-          ['Ref', 'DKG$transactionId'],
+          ['Ref', 'WF$transactionId'],
         ],
       });
     }

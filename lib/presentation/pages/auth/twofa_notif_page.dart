@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../blocs/auth/otp_bloc.dart';
-import '../../widgets/feature_icon.dart';
 
 class TwoFANotifPage extends StatefulWidget {
   final String mode;
@@ -33,7 +31,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
           });
         } else if (state is OtpError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppColors.red),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
@@ -45,7 +43,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.ink),
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                   onPressed: () => context.go(widget.mode == 'setup' ? '/setup-2fa' : '/login'),
                 ),
               ),
@@ -55,13 +53,20 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
                   child: Column(
                     children: [
                       const SizedBox(height: 20),
-                      FeatureIcon(
-                        icon: _phase == 'approved'
-                            ? Icons.verified_user_outlined
-                            : Icons.notifications_outlined,
-                        tone: 'green',
-                        size: 82,
-                        iconSize: 40,
+                      Container(
+                        width: 82,
+                        height: 82,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF5F5F5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _phase == 'approved'
+                              ? Icons.verified_user_outlined
+                              : Icons.notifications_outlined,
+                          color: Colors.black87,
+                          size: 40,
+                        ),
                       ),
                       const SizedBox(height: 26),
                       Text(
@@ -70,7 +75,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 23,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.ink,
+                          color: Colors.black,
                           letterSpacing: -0.3,
                         ),
                         textAlign: TextAlign.center,
@@ -84,7 +89,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
                         style: const TextStyle(
                           fontFamily: 'PlusJakartaSans',
                           fontSize: 14.5,
-                          color: AppColors.slate500,
+                          color: Colors.black54,
                           height: 1.55,
                         ),
                       ),
@@ -98,7 +103,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
                               height: 18,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.4,
-                                valueColor: AlwaysStoppedAnimation(AppColors.green),
+                                valueColor: AlwaysStoppedAnimation(Colors.black),
                               ),
                             ),
                             SizedBox(width: 10),
@@ -106,7 +111,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
                                 style: TextStyle(
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 13.5,
-                                  color: AppColors.slate400,
+                                  color: Colors.black54,
                                   fontWeight: FontWeight.w600,
                                 )),
                           ],
@@ -115,7 +120,7 @@ class _TwoFANotifPageState extends State<TwoFANotifPage> {
                       const Spacer(),
                       const Text(
                         'Tidak menerima notifikasi? Kirim ulang',
-                        style: TextStyle(fontSize: 12.5, color: AppColors.slate400),
+                        style: TextStyle(fontSize: 12.5, color: Colors.black38),
                       ),
                     ],
                   ),

@@ -3,12 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../blocs/auth/otp_bloc.dart';
-import '../../widgets/app_button.dart';
 import '../../widgets/code_input.dart';
-import '../../widgets/feature_icon.dart';
 
 class TwoFASmtpPage extends StatefulWidget {
   final String mode; // 'login' or 'setup'
@@ -70,7 +67,7 @@ class _TwoFASmtpPageState extends State<TwoFASmtpPage> {
           });
         } else if (state is OtpError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppColors.red),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
@@ -82,7 +79,7 @@ class _TwoFASmtpPageState extends State<TwoFASmtpPage> {
               Align(
                 alignment: Alignment.topLeft,
                 child: IconButton(
-                  icon: const Icon(DkgIcons.arrowLeft, color: AppColors.ink),
+                  icon: const Icon(Icons.arrow_back_rounded, color: Colors.black),
                   onPressed: () => context.go(widget.mode == 'setup' ? '/setup-2fa' : '/login'),
                 ),
               ),
@@ -91,20 +88,28 @@ class _TwoFASmtpPageState extends State<TwoFASmtpPage> {
                   padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
                   child: Column(
                     children: [
-                      const FeatureIcon(icon: DkgIcons.mail, tone: 'blue', size: 74, iconSize: 36),
+                      Container(
+                        width: 74,
+                        height: 74,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF5F5F5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.mail_outline_rounded, color: Colors.black87, size: 36),
+                      ),
                       const SizedBox(height: 18),
                       const Text('Masukkan Email OTP',
                           style: TextStyle(
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 23,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.ink,
+                            color: Colors.black,
                             letterSpacing: -0.3,
                           )),
                       const SizedBox(height: 8),
                       const Text('Kode 6 digit dikirim ke email kamu via SMTP',
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 14.5, color: AppColors.slate500, height: 1.55)),
+                          style: TextStyle(fontSize: 14.5, color: Colors.black54, height: 1.55)),
                       const SizedBox(height: 28),
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 80),
@@ -116,7 +121,7 @@ class _TwoFASmtpPageState extends State<TwoFASmtpPage> {
                         const Text('Kode salah',
                             style: TextStyle(
                               fontFamily: 'PlusJakartaSans',
-                              color: AppColors.red,
+                              color: Colors.red,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             )),
@@ -125,19 +130,19 @@ class _TwoFASmtpPageState extends State<TwoFASmtpPage> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 8),
                         decoration: BoxDecoration(
-                          color: AppColors.amberSurface,
+                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: const [
-                            Icon(DkgIcons.info, size: 16, color: Color(0xFFB5760B)),
+                            Icon(Icons.info_outline_rounded, size: 16, color: Colors.black87),
                             SizedBox(width: 8),
                             Text('Cek email inbox atau spam kamu',
                                 style: TextStyle(
                                   fontFamily: 'PlusJakartaSans',
                                   fontSize: 12.5,
-                                  color: Color(0xFF8A5A06),
+                                  color: Colors.black,
                                   fontWeight: FontWeight.w600,
                                 )),
                           ],
@@ -147,18 +152,18 @@ class _TwoFASmtpPageState extends State<TwoFASmtpPage> {
                       _timer > 0
                           ? Text(
                               'Kirim ulang dalam 00:${_timer.toString().padLeft(2, '0')}',
-                              style: const TextStyle(fontSize: 13.5, color: AppColors.slate400),
+                              style: const TextStyle(fontSize: 13.5, color: Colors.black38),
                             )
                           : TextButton.icon(
                               onPressed: () {
                                 context.read<OtpBloc>().add(OtpSendEmail());
                                 _startTimer();
                               },
-                              icon: const Icon(DkgIcons.refresh, size: 16, color: AppColors.primary),
+                              icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.black),
                               label: const Text('Kirim ulang kode',
                                   style: TextStyle(
                                     fontFamily: 'PlusJakartaSans',
-                                    color: AppColors.primary,
+                                    color: Colors.black,
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
                                   )),

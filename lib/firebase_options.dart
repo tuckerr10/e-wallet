@@ -5,43 +5,16 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
         return ios;
-      case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
-      case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
-      case TargetPlatform.linux:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',
@@ -49,20 +22,29 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCWAzGMTyg1uSspi1qfno71sj4iCfp7qGk',
-    appId: '1:948878883710:android:516b94bdc2276b68a0512f',
-    messagingSenderId: '948878883710',
-    projectId: 'fir-emoney-e9256',
-    storageBucket: 'fir-emoney-e9256.firebasestorage.app',
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBMWjc0x_EnODgPs-MfUDeZPhGLy-1RUAg',
+    appId: '1:269558842359:web:e9b2cff961c7e8c5e264f2',
+    messagingSenderId: '269558842359',
+    projectId: 'e-money-b2979',
+    authDomain: 'e-money-b2979.firebaseapp.com',
+    storageBucket: 'e-money-b2979.firebasestorage.app',
+    measurementId: 'G-1C662GRF3J',
   );
 
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyCexFx1c73GeD9gmthAYeIKRu2NsxM1kvc',
+    appId: '1:269558842359:android:36765c4bfb51f681e264f2',
+    messagingSenderId: '269558842359',
+    projectId: 'e-money-b2979',
+    storageBucket: 'e-money-b2979.firebasestorage.app',
+  );
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyA46uBUvmVQKsSL7HIXZG58MD9jXQCFX7c',
-    appId: '1:948878883710:ios:5363ad2b9fbe06b2a0512f',
-    messagingSenderId: '948878883710',
-    projectId: 'fir-emoney-e9256',
-    storageBucket: 'fir-emoney-e9256.firebasestorage.app',
-    iosBundleId: 'com.kampus.dompetKampusGlobal',
+    apiKey: 'AIzaSyCexFx1c73GeD9gmthAYeIKRu2NsxM1kvc',
+    appId: '1:269558842359:ios:c7b04ef081f59b7ce264f2',
+    messagingSenderId: '269558842359',
+    projectId: 'e-money-b2979',
+    storageBucket: 'e-money-b2979.firebasestorage.app',
+    iosBundleId: 'com.frontend.emoney',
   );
 }

@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/currency_formatter.dart';
 import '../../blocs/payment/payment_bloc.dart';
 import '../../widgets/app_button.dart';
 import '../../widgets/app_top_bar.dart';
-import '../../widgets/feature_icon.dart';
 import '../../../core/utils/local_notification_helper.dart';
 
 class TopUpPage extends StatefulWidget {
@@ -21,9 +19,9 @@ class _TopUpPageState extends State<TopUpPage> {
 
   final _chips = [50000.0, 100000.0, 200000.0, 500000.0, 1000000.0];
   final _methods = [
-    {'id': 'bca', 'name': 'BCA Virtual Account', 'tone': 'blue', 'icon': Icons.account_balance_outlined},
-    {'id': 'card', 'name': 'Kartu Debit/Kredit', 'tone': 'violet', 'icon': Icons.credit_card_outlined},
-    {'id': 'alfa', 'name': 'Alfamart / Indomaret', 'tone': 'red', 'icon': Icons.storefront_outlined},
+    {'id': 'bca', 'name': 'BCA Virtual Account', 'icon': Icons.account_balance_outlined},
+    {'id': 'card', 'name': 'Kartu Debit/Kredit', 'icon': Icons.credit_card_outlined},
+    {'id': 'alfa', 'name': 'Alfamart / Indomaret', 'icon': Icons.storefront_outlined},
   ];
 
   @override
@@ -47,12 +45,12 @@ class _TopUpPageState extends State<TopUpPage> {
           });
         } else if (state is PaymentError) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message), backgroundColor: AppColors.red),
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
           );
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.bg,
+        backgroundColor: const Color(0xFFF5F5F5),
         appBar: AppTopBar(title: 'Isi Saldo', onBack: () => context.go('/home')),
         body: Column(
           children: [
@@ -69,7 +67,7 @@ class _TopUpPageState extends State<TopUpPage> {
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.slate400,
+                            color: Colors.black54,
                           )),
                     ),
                     GridView.count(
@@ -86,10 +84,10 @@ class _TopUpPageState extends State<TopUpPage> {
                           child: AnimatedContainer(
                             duration: const Duration(milliseconds: 150),
                             decoration: BoxDecoration(
-                              color: selected ? AppColors.primarySurface : Colors.white,
+                              color: selected ? Colors.black : Colors.white,
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: selected ? AppColors.primaryLight : AppColors.line,
+                                color: selected ? Colors.black : const Color(0xFFE0E0E0),
                                 width: 1.8,
                               ),
                             ),
@@ -99,7 +97,7 @@ class _TopUpPageState extends State<TopUpPage> {
                                     fontFamily: 'PlusJakartaSans',
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
-                                    color: selected ? AppColors.primary : AppColors.ink,
+                                    color: selected ? Colors.white : Colors.black,
                                   )),
                             ),
                           ),
@@ -114,14 +112,13 @@ class _TopUpPageState extends State<TopUpPage> {
                             fontFamily: 'PlusJakartaSans',
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.slate400,
+                            color: Colors.black54,
                           )),
                     ),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: AppColors.shadowSoft,
                       ),
                       child: Column(
                         children: _methods.asMap().entries.map((entry) {
@@ -130,14 +127,22 @@ class _TopUpPageState extends State<TopUpPage> {
                           final selected = _method == m['id'];
                           return Column(
                             children: [
-                              if (i > 0) const Divider(height: 1, indent: 16, color: AppColors.line2),
+                              if (i > 0) const Divider(height: 1, indent: 16, color: Color(0xFFEEEEEE)),
                               GestureDetector(
                                 onTap: () => setState(() => _method = m['id'] as String),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                                   child: Row(
                                     children: [
-                                      FeatureIcon(icon: m['icon'] as IconData, tone: m['tone'] as String, size: 42, iconSize: 20),
+                                      Container(
+                                        width: 42,
+                                        height: 42,
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFFF5F5F5),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(m['icon'] as IconData, color: Colors.black87, size: 20),
+                                      ),
                                       const SizedBox(width: 13),
                                       Expanded(
                                         child: Text(m['name'] as String,
@@ -145,7 +150,7 @@ class _TopUpPageState extends State<TopUpPage> {
                                               fontFamily: 'PlusJakartaSans',
                                               fontSize: 14.5,
                                               fontWeight: FontWeight.w700,
-                                              color: AppColors.ink,
+                                              color: Colors.black,
                                             )),
                                       ),
                                       AnimatedContainer(
@@ -154,9 +159,9 @@ class _TopUpPageState extends State<TopUpPage> {
                                         height: 20,
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: selected ? AppColors.primary : Colors.white,
+                                          color: selected ? Colors.black : Colors.white,
                                           border: Border.all(
-                                            color: selected ? AppColors.primary : AppColors.line,
+                                            color: selected ? Colors.black : const Color(0xFFE0E0E0),
                                             width: 2,
                                           ),
                                         ),
@@ -187,11 +192,12 @@ class _TopUpPageState extends State<TopUpPage> {
               ),
             ),
             Container(
-              color: AppColors.bg,
+              color: Colors.white,
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
               child: BlocBuilder<PaymentBloc, PaymentState>(
                 builder: (context, state) => AppButton(
                   label: 'Top Up ${CurrencyFormatter.format(_amount)}',
+                  variant: AppButtonVariant.dark, // Using dark button to match minimalist theme
                   isLoading: state is PaymentLoading,
                   onPressed: () {
                     context.read<PaymentBloc>().add(PaymentTopupRequested(_amount));

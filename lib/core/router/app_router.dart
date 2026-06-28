@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../../domain/entities/transaction_entity.dart';
 import '../../injection/injection_container.dart';
 import '../../presentation/blocs/account/account_bloc.dart';
 import '../../presentation/blocs/auth/auth_bloc.dart';
@@ -16,6 +17,7 @@ import '../../presentation/pages/auth/twofa_smtp_page.dart';
 import '../../presentation/pages/auth/twofa_totp_page.dart';
 import '../../presentation/pages/auth/verify_email_page.dart';
 import '../../presentation/pages/history/history_page.dart';
+import '../../presentation/pages/history/transaction_detail_page.dart';
 import '../../presentation/pages/home/home_page.dart';
 import '../../presentation/pages/merchant/merchant_checkout_page.dart';
 import '../../presentation/pages/payment/payment_deeplink_page.dart';
@@ -93,6 +95,7 @@ class AppRouter {
                           : 'home';
 
               return _withAccount(Scaffold(
+                extendBody: true,
                 body: child,
                 bottomNavigationBar: AppTabBar(
                   active: tab,
@@ -114,6 +117,14 @@ class AppRouter {
               GoRoute(path: '/promo', builder: (_, __) => const PromoPage()),
               GoRoute(path: '/akun', builder: (_, __) => const AccountPage()),
             ],
+          ),
+          GoRoute(
+            path: '/transaction/detail',
+            builder: (_, state) {
+              return _withAccount(TransactionDetailPage(
+                txn: state.extra as TransactionEntity,
+              ));
+            },
           ),
           // Payment flows (no tab bar)
           GoRoute(path: '/topup', builder: (_, __) => _withPayment(const TopUpPage())),

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
-import 'feature_icon.dart';
 
 class AppTabBar extends StatelessWidget {
   final String active;
@@ -16,44 +14,70 @@ class AppTabBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 64 + MediaQuery.of(context).padding.bottom,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.black, // Dark dynamic island theme
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.25),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _TabItem(icon: DkgIcons.home, label: 'Home', tabKey: 'home', active: active, onTap: onTab),
-            _TabItem(icon: DkgIcons.history, label: 'Riwayat', tabKey: 'history', active: active, onTap: onTab),
+            _TabItem(
+              iconOutlined: Icons.home_outlined,
+              iconFilled: Icons.home_rounded,
+              label: 'Home',
+              tabKey: 'home',
+              active: active,
+              onTap: onTab,
+            ),
+            _TabItem(
+              iconOutlined: Icons.receipt_long_outlined,
+              iconFilled: Icons.receipt_long_rounded,
+              label: 'Riwayat',
+              tabKey: 'history',
+              active: active,
+              onTap: onTab,
+            ),
             // Center scan button
-            Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: onScan,
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
-                      shape: BoxShape.circle,
-                      boxShadow: AppColors.shadowPrimary,
-                    ),
-                    child: const Icon(DkgIcons.scan, color: Colors.white, size: 26),
-                  ),
+            GestureDetector(
+              onTap: onScan,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                width: 52,
+                height: 52,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
                 ),
+                child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.black, size: 24),
               ),
             ),
-            _TabItem(icon: DkgIcons.gift, label: 'Promo', tabKey: 'promo', active: active, onTap: onTab),
-            _TabItem(icon: DkgIcons.user, label: 'Akun', tabKey: 'akun', active: active, onTap: onTab),
+            _TabItem(
+              iconOutlined: Icons.credit_card_outlined,
+              iconFilled: Icons.credit_card_rounded,
+              label: 'Cards',
+              tabKey: 'promo',
+              active: active,
+              onTap: onTab,
+            ),
+            _TabItem(
+              iconOutlined: Icons.person_outline_rounded,
+              iconFilled: Icons.person_rounded,
+              label: 'Akun',
+              tabKey: 'akun',
+              active: active,
+              onTap: onTab,
+            ),
           ],
         ),
       ),
@@ -62,14 +86,16 @@ class AppTabBar extends StatelessWidget {
 }
 
 class _TabItem extends StatelessWidget {
-  final IconData icon;
+  final IconData iconOutlined;
+  final IconData iconFilled;
   final String label;
   final String tabKey;
   final String active;
   final ValueChanged<String> onTap;
 
   const _TabItem({
-    required this.icon,
+    required this.iconOutlined,
+    required this.iconFilled,
     required this.label,
     required this.tabKey,
     required this.active,
@@ -79,26 +105,34 @@ class _TabItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isActive = active == tabKey;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => onTap(tabKey),
-        behavior: HitTestBehavior.opaque,
+    return GestureDetector(
+      onTap: () => onTap(tabKey),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 60,
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isActive ? AppColors.primary : AppColors.slate400,
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              transitionBuilder: (child, anim) => ScaleTransition(scale: anim, child: child),
+              child: Icon(
+                isActive ? iconFilled : iconOutlined,
+                key: ValueKey(isActive),
+                size: 24,
+                color: isActive ? Colors.white : Colors.white54,
+              ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Text(
               label,
               style: TextStyle(
                 fontFamily: 'PlusJakartaSans',
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? AppColors.primary : AppColors.slate400,
+                color: isActive ? Colors.white : Colors.white54,
               ),
             ),
           ],

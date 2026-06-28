@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "269558842359",
+    "project_id": "e-money-b2979",
+    "storage_bucket": "e-money-b2979.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269558842359:android:c7b04ef081f59b7ce264f2",
+        "android_client_info": {
+          "package_name": "com.frontend.emoney"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "269558842359-gniptlgtc3bnj07rblc210s8o6vql44v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCexFx1c73GeD9gmthAYeIKRu2NsxM1kvc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "269558842359-gniptlgtc3bnj07rblc210s8o6vql44v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

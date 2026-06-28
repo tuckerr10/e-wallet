@@ -3,6 +3,8 @@ import 'package:app_links/app_links.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import '../../injection/injection_container.dart';
+import '../network/api_client.dart';
 
 /// Payload yang diterima dari deeplink pembayaran merchant.
 ///
@@ -108,8 +110,12 @@ class DeeplinkService {
     try {
       final initialUri = await _appLinks.getInitialLink();
       debugPrint('[DeeplinkService] initialUri (cold-start): $initialUri');
-      if (initialUri != null && _isPaymentLink(initialUri)) {
-        _storePending(initialUri);
+      if (initialUri != null) {
+        if (_isPaymentLink(initialUri)) {
+          _storePending(initialUri);
+        } else if (_isAccountLink(initialUri)) {
+          _pendingPayload = 'NAVIGATE_TO_AKUN';
+        }
       }
     } catch (e) {
       debugPrint('[DeeplinkService] getInitialLink error: $e');
@@ -137,10 +143,50 @@ class DeeplinkService {
 
   /// Handle URI in-app: GoRouter sudah mounted, jadwalkan navigasi ke /pay
   /// di post-frame agar tidak konflik dengan state GoRouter yang sedang update.
+  bool _isPaymentLink(Uri uri) {
+    if (uri.scheme == 'dompetkampus' && uri.host == 'pay') return true;
+    if (uri.scheme == 'https' &&
+        uri.host == 'dompetkampus.app' &&
+        uri.path.startsWith('/pay')) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _isAccountLink(Uri uri) {
+    return uri.scheme == 'dompetkampus' && uri.host == 'akun';
+  }
+
+  /// Otomatis aktifkan koneksi Bag Store jika belum aktif.
+  Future<void> _autoConnectBagStore() async {
+    try {
+      final client = sl<ApiClient>();
+      final status = await client.get('/v1/auth/connection');
+      if (status['success'] == true && status['connected'] != true) {
+        await client.post('/v1/auth/connection/toggle');
+        debugPrint('[DeeplinkService] Bag Store auto-connected!');
+      } else {
+        debugPrint('[DeeplinkService] Bag Store sudah terhubung.');
+      }
+    } catch (e) {
+      debugPrint('[DeeplinkService] Auto-connect error: $e');
+    }
+  }
+
   void _handleInAppUri(Uri uri) {
     debugPrint('[DeeplinkService] *** IN-APP URI DITERIMA ***: $uri');
+    if (_isAccountLink(uri)) {
+      debugPrint('[DeeplinkService] Account link — auto-connect lalu navigasi /akun');
+      _autoConnectBagStore().then((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _router.go('/akun');
+        });
+      });
+      return;
+    }
+
     if (!_isPaymentLink(uri)) {
-      debugPrint('[DeeplinkService] Bukan payment link, diabaikan.');
+      debugPrint('[DeeplinkService] Bukan payment atau account link, diabaikan.');
       return;
     }
 
@@ -157,16 +203,6 @@ class DeeplinkService {
         _router.go('/pay', extra: e.message);
       });
     }
-  }
-
-  bool _isPaymentLink(Uri uri) {
-    if (uri.scheme == 'dompetkampus' && uri.host == 'pay') return true;
-    if (uri.scheme == 'https' &&
-        uri.host == 'dompetkampus.app' &&
-        uri.path.startsWith('/pay')) {
-      return true;
-    }
-    return false;
   }
 
   void dispose() => _subscription?.cancel();

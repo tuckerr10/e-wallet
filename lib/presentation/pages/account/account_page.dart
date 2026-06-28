@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:dio/dio.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/network/api_client.dart';
 import '../../../injection/injection_container.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/app_avatar.dart';
 import '../../widgets/app_badge.dart';
-import '../../widgets/feature_icon.dart';
+import '../../../core/utils/local_notification_helper.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -19,15 +16,12 @@ class AccountPage extends StatefulWidget {
 }
 
 class _AccountPageState extends State<AccountPage> {
-  int _purchaseCount = 0;
-  bool _loadingCount = true;
   bool _bagStoreConnected = false;
   bool _loadingConnection = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchPurchaseCount();
     _fetchConnectionStatus();
   }
 
@@ -58,56 +52,24 @@ class _AccountPageState extends State<AccountPage> {
           _bagStoreConnected = response['connected'] as bool? ?? false;
           _loadingConnection = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(_bagStoreConnected ? 'Bag Store berhasil terhubung!' : 'Koneksi Bag Store diputuskan.'),
-            backgroundColor: _bagStoreConnected ? AppColors.green : AppColors.amber,
-          ),
+        LocalNotificationHelper.showNotification(
+          id: 5,
+          title: 'Status Koneksi E-Commerce',
+          body: _bagStoreConnected ? 'Bag Store berhasil terhubung!' : 'Koneksi Bag Store diputuskan.',
         );
         return;
       }
     } catch (e) {
       debugPrint('[AccountPage] Error toggling connection: $e');
+      if (mounted) {
+        LocalNotificationHelper.showNotification(
+          id: 6,
+          title: 'Gagal memperbarui koneksi',
+          body: 'Pastikan backend be-emoney sudah berjalan!',
+        );
+      }
     }
     setState(() => _loadingConnection = false);
-  }
-
-  Future<void> _fetchPurchaseCount() async {
-    try {
-      final uid = FirebaseAuth.instance.currentUser?.uid;
-      if (uid == null) {
-        setState(() => _loadingCount = false);
-        return;
-      }
-
-      final dio = Dio(BaseOptions(
-        connectTimeout: const Duration(seconds: 4),
-        receiveTimeout: const Duration(seconds: 4),
-      ));
-      
-      final response = await dio.get(
-        'http://192.168.1.107:8080/v1/purchases',
-        options: Options(headers: {'Authorization': 'Bearer $uid'}),
-      );
-
-      if (response.statusCode == 200 && response.data != null) {
-        final data = response.data['data'] as List<dynamic>?;
-        if (data != null) {
-          int count = 0;
-          for (var item in data) {
-            count += (item['quantity'] as num? ?? 1).toInt();
-          }
-          setState(() {
-            _purchaseCount = count;
-            _loadingCount = false;
-          });
-          return;
-        }
-      }
-    } catch (e) {
-      debugPrint('[AccountPage] Error fetching purchase count: $e');
-    }
-    setState(() => _loadingCount = false);
   }
 
   @override
@@ -122,27 +84,20 @@ class _AccountPageState extends State<AccountPage> {
         final user = state is AuthAuthenticated ? state.user : null;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF5F5FF),
+          backgroundColor: Colors.white,
           body: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: AppColors.splashGradient,
-                    borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
-                    ),
-                  ),
-                  padding: EdgeInsets.fromLTRB(
-                      20, MediaQuery.of(context).padding.top + 16, 20, 32),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(24, MediaQuery.of(context).padding.top + 32, 24, 24),
                   child: Row(
                     children: [
                       AppAvatar(
                         name: user?.name ?? 'User',
-                        size: 64,
-                        bg: Colors.white.withValues(alpha: 0.2),
+                        size: 60,
+                        bg: const Color(0xFFF5F5F5),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
@@ -152,39 +107,18 @@ class _AccountPageState extends State<AccountPage> {
                             Text(user?.name ?? 'Pengguna',
                                 style: const TextStyle(
                                   fontFamily: 'PlusJakartaSans',
-                                  fontSize: 20,
+                                  fontSize: 22,
                                   fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  letterSpacing: -0.3,
+                                  color: Colors.black,
+                                  letterSpacing: -0.5,
                                 )),
                             const SizedBox(height: 2),
                             Text(user?.email ?? '',
                                 overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
                                   fontFamily: 'PlusJakartaSans',
-                                  fontSize: 13,
-                                  color: Colors.white70,
-                                )),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.verified_user_rounded, size: 14, color: AppColors.neon),
-                            SizedBox(width: 5),
-                            Text('WF Member',
-                                style: TextStyle(
-                                  fontFamily: 'PlusJakartaSans',
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  fontSize: 14,
+                                  color: Colors.black54,
                                 )),
                           ],
                         ),
@@ -193,193 +127,106 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                 ),
 
-                const SizedBox(height: 18),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Section: E-Commerce
-                      const Padding(
-                        padding: EdgeInsets.only(left: 4, bottom: 8),
-                        child: Text('E-Commerce Terhubung',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.slate500,
-                            )),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: AppColors.shadowSoft,
-                        ),
-                        child: Column(
-                          children: [
-                            _Row(
-                              icon: Icons.shopping_bag_outlined,
-                              tone: 'violet',
-                              title: 'Bag Store',
-                              subtitle: _loadingConnection
-                                  ? 'Memuat status koneksi...'
-                                  : _bagStoreConnected
-                                      ? (_loadingCount
-                                          ? 'Terhubung · Memuat...'
-                                          : 'Terhubung · $_purchaseCount produk dibeli')
-                                      : 'Terputus · Hubungkan untuk belanja',
-                              onTap: () async {
-                                final result = await context.push('/bag-store');
-                                if (result == true) {
-                                  setState(() {
-                                    _loadingCount = true;
-                                    _loadingConnection = true;
-                                  });
-                                  _fetchPurchaseCount();
-                                  _fetchConnectionStatus();
-                                }
-                              },
-                              right: _loadingConnection
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation(AppColors.primary),
-                                      ),
-                                    )
-                                  : Switch.adaptive(
-                                      value: _bagStoreConnected,
-                                      onChanged: (_) => _toggleConnection(),
-                                      activeTrackColor: AppColors.green,
-                                    ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+                const Divider(height: 1, color: Color(0xFFEEEEEE)),
 
-                      // Section: Keamanan
-                      const Padding(
-                        padding: EdgeInsets.only(left: 4, bottom: 8),
-                        child: Text('Keamanan',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.slate500,
-                            )),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: AppColors.shadowSoft,
-                        ),
-                        child: Column(
-                          children: [
-                            _Row(
-                              icon: Icons.verified_user_outlined,
-                              tone: 'green',
-                              title: 'Verifikasi 2 langkah (2FA)',
-                              subtitle: 'Aktif · Email OTP',
-                              onTap: () => context.go('/setup-2fa'),
-                              right: const AppBadge(label: 'Aktif', tone: 'green'),
-                            ),
-                            const Divider(height: 1, indent: 56, color: AppColors.line2),
-                            _Row(
-                              icon: Icons.lock_outline_rounded,
-                              tone: 'blue',
-                              title: 'Ubah PIN keamanan',
-                              subtitle: 'Terakhir diubah 2 bln lalu',
-                              onTap: () {},
-                            ),
-                            const Divider(height: 1, indent: 56, color: AppColors.line2),
-                            _Row(
-                              icon: Icons.fingerprint_rounded,
-                              tone: 'orange',
-                              title: 'Login biometrik',
-                              subtitle: 'Sidik jari',
-                              onTap: () {},
-                              right: _Toggle(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-
-                      // Section: Akun
-                      const Padding(
-                        padding: EdgeInsets.only(left: 4, bottom: 8),
-                        child: Text('Pengaturan Akun',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.slate500,
-                            )),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: AppColors.shadowSoft,
-                        ),
-                        child: Column(
-                          children: [
-                            _Row(icon: Icons.person_outline_rounded, tone: 'blue', title: 'Data pribadi', onTap: () {}),
-                            const Divider(height: 1, indent: 56, color: AppColors.line2),
-                            _Row(icon: Icons.account_balance_outlined, tone: 'green', title: 'Rekening & kartu tersimpan', onTap: () {}),
-                            const Divider(height: 1, indent: 56, color: AppColors.line2),
-                            _Row(icon: Icons.settings_outlined, tone: 'slate', title: 'Pengaturan aplikasi', onTap: () {}),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Logout button
-                      GestureDetector(
-                        onTap: () => context.read<AuthBloc>().add(AuthLogoutRequested()),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(18),
-                            boxShadow: AppColors.shadowSoft,
-                            border: Border.all(color: AppColors.red.withValues(alpha: 0.1)),
+                // Section: E-Commerce
+                _SectionTitle(title: 'Koneksi E-Commerce'),
+                _Row(
+                  icon: Icons.shopping_bag_outlined,
+                  title: 'Bag Store',
+                  subtitle: _loadingConnection
+                      ? 'Memuat status koneksi...'
+                      : _bagStoreConnected
+                          ? 'Terhubung'
+                          : 'Belum terhubung',
+                  onTap: () {
+                    _toggleConnection();
+                  },
+                  right: _loadingConnection
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation(Colors.black),
                           ),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.logout_rounded, size: 20, color: AppColors.red),
-                              SizedBox(width: 9),
-                              Text('Keluar dari Akun',
-                                  style: TextStyle(
-                                    fontFamily: 'PlusJakartaSans',
-                                    color: AppColors.red,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 15,
-                                  )),
-                            ],
-                          ),
+                        )
+                      : Switch.adaptive(
+                          value: _bagStoreConnected,
+                          onChanged: (_) => _toggleConnection(),
+                          activeTrackColor: Colors.black,
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      const Center(
-                        child: Text('Wallet Frenzy · v2.0.0',
-                            style: TextStyle(
-                              fontFamily: 'PlusJakartaSans',
-                              fontSize: 12,
-                              color: AppColors.slate400,
-                              fontWeight: FontWeight.w600,
-                            )),
-                      ),
-                      const SizedBox(height: 24),
-                    ],
+                ),
+
+                const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+                // Section: Keamanan
+                _SectionTitle(title: 'Keamanan'),
+                _Row(
+                  icon: Icons.verified_user_outlined,
+                  title: 'Verifikasi 2 langkah (2FA)',
+                  subtitle: 'Aktif · Email OTP',
+                  onTap: () => context.go('/setup-2fa'),
+                  right: const AppBadge(label: 'Aktif', tone: 'green'),
+                ),
+                _Row(
+                  icon: Icons.lock_outline_rounded,
+                  title: 'Ubah PIN keamanan',
+                  subtitle: 'Terakhir diubah 2 bln lalu',
+                  onTap: () {},
+                ),
+                _Row(
+                  icon: Icons.fingerprint_rounded,
+                  title: 'Login biometrik',
+                  subtitle: 'Sidik jari',
+                  onTap: () {},
+                  right: _Toggle(),
+                ),
+
+                const Divider(height: 1, color: Color(0xFFEEEEEE)),
+
+                // Section: Akun
+                _SectionTitle(title: 'Pengaturan Akun'),
+                _Row(icon: Icons.person_outline_rounded, title: 'Data pribadi', onTap: () {}),
+                _Row(icon: Icons.account_balance_outlined, title: 'Rekening & kartu tersimpan', onTap: () {}),
+                _Row(icon: Icons.settings_outlined, title: 'Pengaturan aplikasi', onTap: () {}),
+                _Row(icon: Icons.help_outline_rounded, title: 'Pusat bantuan', onTap: () {}),
+
+                const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                
+                const SizedBox(height: 32),
+                
+                // Logout button
+                Center(
+                  child: GestureDetector(
+                    onTap: () => context.read<AuthBloc>().add(AuthLogoutRequested()),
+                    behavior: HitTestBehavior.opaque,
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                      child: Text('Keluar dari Akun',
+                          style: TextStyle(
+                            fontFamily: 'PlusJakartaSans',
+                            color: Colors.red,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16,
+                          )),
+                    ),
                   ),
                 ),
+                
+                const SizedBox(height: 16),
+                const Center(
+                  child: Text('Wallet Frenzy · v2.0.0',
+                      style: TextStyle(
+                        fontFamily: 'PlusJakartaSans',
+                        fontSize: 12,
+                        color: Colors.black38,
+                        fontWeight: FontWeight.w600,
+                      )),
+                ),
+                
+                // Extra padding at the bottom to prevent overlap with dynamic island tab bar
+                const SizedBox(height: 120),
               ],
             ),
           ),
@@ -389,9 +236,28 @@ class _AccountPageState extends State<AccountPage> {
   }
 }
 
+class _SectionTitle extends StatelessWidget {
+  final String title;
+  const _SectionTitle({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      child: Text(title,
+          style: const TextStyle(
+            fontFamily: 'PlusJakartaSans',
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            color: Colors.black45,
+            letterSpacing: 0.5,
+          )),
+    );
+  }
+}
+
 class _Row extends StatelessWidget {
   final IconData icon;
-  final String tone;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -399,7 +265,6 @@ class _Row extends StatelessWidget {
 
   const _Row({
     required this.icon,
-    required this.tone,
     required this.title,
     this.subtitle,
     required this.onTap,
@@ -412,11 +277,11 @@ class _Row extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         child: Row(
           children: [
-            FeatureIcon(icon: icon, tone: tone, size: 42, iconSize: 20),
-            const SizedBox(width: 14),
+            Icon(icon, color: Colors.black87, size: 24),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,23 +289,25 @@ class _Row extends StatelessWidget {
                   Text(title,
                       style: const TextStyle(
                         fontFamily: 'PlusJakartaSans',
-                        fontSize: 14.5,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ink,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black,
                       )),
                   if (subtitle != null) ...[
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(subtitle!,
                         style: const TextStyle(
                           fontFamily: 'PlusJakartaSans',
-                          fontSize: 12.5,
-                          color: AppColors.slate400,
+                          fontSize: 13,
+                          color: Colors.black54,
+                          fontWeight: FontWeight.w500,
                         )),
                   ],
                 ],
               ),
             ),
-            right ?? const Icon(Icons.chevron_right_rounded, size: 18, color: AppColors.slate400),
+            if (right != null) right!
+            else const Icon(Icons.chevron_right_rounded, size: 20, color: Colors.black26),
           ],
         ),
       ),
@@ -464,7 +331,7 @@ class _ToggleState extends State<_Toggle> {
         width: 44,
         height: 26,
         decoration: BoxDecoration(
-          color: _on ? AppColors.green : AppColors.slate300,
+          color: _on ? Colors.black : const Color(0xFFE0E0E0),
           borderRadius: BorderRadius.circular(20),
         ),
         child: AnimatedAlign(
