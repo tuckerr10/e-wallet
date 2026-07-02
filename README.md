@@ -1,3 +1,5 @@
+![Visitor Count](https://komarev.com/ghpvc/?username=tuckerr10&repo=e-wallet&color=blue)
+
 <div align="center">
 
 # 💸 E-Wallet Frenzy (Frontend)
